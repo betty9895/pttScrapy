@@ -9,8 +9,15 @@ import scrapy
 
 
 class PttScrapyItem(scrapy.Item):
-
+    href = scrapy.Field()
     title = scrapy.Field()
-    herf = scrapy.Field()
-    # date = scrapy.Field()
-    # author = scrapy.Field()
+    time=scrapy.Field()
+    author=scrapy.Field()
+    url=scrapy.Field()
+
+    positive=scrapy.Field()
+    negative=scrapy.Field()
+    score=scrapy.Field()
+    comment_num=scrapy.Field()
+
+    img=scrapy.Field()

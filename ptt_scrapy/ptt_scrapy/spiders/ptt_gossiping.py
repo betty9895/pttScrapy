@@ -9,11 +9,12 @@ class PttGossipingSpider(scrapy.Spider):
 
     def __init__(self):
         self.num_of_pages = 0
-        self.max_pages = 50
+        self.max_pages = 5
         
 
     def start_requests(self):
-        yield scrapy.Request("https://www.ptt.cc/bbs/Gossiping/search?q=%E6%96%B0%E8%81%9E", cookies={'over18': '1'})
+        url="https://www.ptt.cc/bbs/Gossiping/search?q=%E6%96%B0%E8%81%9E"
+        yield scrapy.Request(url, cookies={'over18': '1'})
 
     def parse(self, response):
         # for sel in response.css("div.r-ent"):
@@ -25,20 +26,20 @@ class PttGossipingSpider(scrapy.Spider):
         for href in response.css("div.title a::attr(href)").extract():
             href = response.urljoin(href)
             yield scrapy.Request(href, callback=self.parse_post)
-
+        
         # 頁數計算
         self.num_of_pages = self.num_of_pages+1
-
+        
         # 自動翻頁
         if self.num_of_pages < self.max_pages:
-            pre_page = response.xpath("//*[@id='action-bar-container']/div/div[2]/a[2]/@href")
-            if pre_page:
-                url = response.urljoin(pre_page[0])
-                yield scrapy.Request(url, callback=self.parse_post)
+            prev_page = response.xpath('//div[@id="action-bar-container"]//a[contains(text(), "上頁")]/@href')
+            if prev_page:    # 是否有上一頁
+                url = response.urljoin(prev_page[0].extract())
+                yield scrapy.Request(url, self.parse)
             else:
                 print("目前頁數:", self.num_of_pages)
         else:
-            print("已經到達最大頁數", self.max_pages)
+            print("已經到達最大頁數: ", self.max_pages)
 
     def parse_post(self, response):
         item = PttScrapyItem()
